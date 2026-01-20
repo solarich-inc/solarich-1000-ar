@@ -5,49 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solarich 1000 AR</title>
   <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#fff;color:#111}
-    .wrap{max-width:720px;margin:0 auto;padding:24px}
-    .logo{font-weight:700;font-size:28px;text-align:center;margin:8px 0 6px}
-    .note{background:#f6f6f6;border-radius:10px;padding:12px 14px;color:#c0392b;font-weight:700;text-align:center;line-height:1.5}
-    .btn{display:block;width:100%;border:0;border-radius:999px;padding:16px 18px;margin:18px 0;background:#1aa65b;color:#fff;font-size:22px;font-weight:800}
-    .sec{margin-top:14px}
-    h2{font-size:20px;margin:18px 0 10px}
-    ul{margin:0;padding-left:18px;line-height:1.9}
-    .close{display:block;margin:22px auto 0;border:1px solid #ddd;background:#fff;border-radius:8px;padding:12px 14px;font-size:16px}
-    .footer{margin-top:16px;text-align:center;color:#999;font-size:13px}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;background:#fff}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .btn{display:inline-block;width:min(560px,100%);text-align:center;padding:18px 22px;border-radius:999px;
+         background:#16a34a;color:#fff;text-decoration:none;font-size:20px;font-weight:700}
+    .note{margin-top:14px;color:#666;font-size:13px;text-align:center}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="logo">Solarich 1000</div>
-
-    <div class="note">3Dデータの読込に4〜5秒かかる場合がございます。<br>ボタンタップ後そのままお待ち下さい。</div>
-
-    <!-- iOS Quick Look用：ここをボタンで起動 -->
-    <a id="ios-ar" rel="ar" href="model.usdz" style="display:none;"></a>
-
-    <button class="btn" id="arBtn">ARを表示する</button>
-
-    <div class="sec">
-      <h2>ARの操作方法</h2>
-      <ul>
-        <li>AR画面に入ったあと任意の場所をタップで設置できます。</li>
-        <li>一本指で位置を動かせます。</li>
-        <li>二本指でズームイン/アウト（縮尺が変わります）。</li>
-        <li>二本指で左右に動かすと回転します。</li>
-      </ul>
-
-      <button class="close" onclick="history.back()">× このページを閉じる</button>
-      <div class="footer">© Solarich</div>
-    </div>
-  </div>
+  <div class="wrap" id="app"></div>
 
   <script>
-    document.getElementById('arBtn').addEventListener('click', () => {
-      // iPhone / iPad Safari: Quick Look AR
-      const a = document.getElementById('ios-ar');
-      a.click();
-    });
+    const app = document.getElementById("app");
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    // iPhone/iPad: ワンタップでQuick Look起動（AR）
+    if (isIOS) {
+      app.innerHTML = `
+        <div>
+          <a class="btn" rel="ar" href="model.usdz">ARを表示する</a>
+          <div class="note">ボタンを押すとARが起動します</div>
+        </div>
+      `;
+    }
+    // Android: Scene Viewer起動（AR）
+    else if (isAndroid) {
+      const url = new URL("model.glb", location.href).href;
+      const sceneViewer =
+        "intent://arvr.google.com/scene-viewer/1.0?file=" + encodeURIComponent(url) +
+        "&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;end;";
+      app.innerHTML = `
+        <div>
+          <a class="btn" href="${sceneViewer}">ARを表示する</a>
+          <div class="note">対応端末でARが起動します</div>
+        </div>
+      `;
+    }
+    // PC: 3Dファイルへ（最短）
+    else {
+      app.innerHTML = `
+        <div>
+          <a class="btn" href="model.glb">3Dを開く</a>
+          <div class="note">PCでは3Dファイルを開きます</div>
+        </div>
+      `;
+    }
   </script>
 </body>
 </html>
